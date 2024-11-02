@@ -17,10 +17,15 @@ function GameComponent() {
 
     const[score, setScore] = useState(0);
 
+    const [width, setWidth] = useState(window.innerWidth * 7/8);
+    const [height, setHeight] = useState(window.innerHeight * 7/8);
+
+
     const gameInit = () => {
+
         const canvas = canvasRef.current;
-        canvas.width = 1200;
-        canvas.height = 700;
+        canvas.width = width;
+        canvas.height = height;
 
         //generate obstacles
         let previousObstacleX = 400;
@@ -28,7 +33,7 @@ function GameComponent() {
         let spacing = 300;
 
         for (let index = 0; index < 100; index++) {
-            initObstacles.push(new Obstacle({ positionX: previousObstacleX }));
+            initObstacles.push(new Obstacle({ positionX: previousObstacleX, height: height }));
             previousObstacleX += spacing;
         }
     
@@ -122,8 +127,11 @@ function GameComponent() {
 
     return (
         <>
-            <h1 style={{ position: "fixed", top: "20px", right: "50%"}}>{score}</h1>
-            <canvas ref={canvasRef} style={{ border: '1px solid black', background: "#2582c3" }}></canvas>
+            <div className='w-full h-[100vh] flex justify-center items-center bg-slate-700'>
+                <h1 className='text-white text-5xl absolute top-20 right-1/2'>{score}</h1>
+
+                <canvas ref={canvasRef} style={{ border: '1px solid black', background: "#2582c3" }}></canvas>
+            </div>
         </>
     );
 }

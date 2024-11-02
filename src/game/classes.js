@@ -1,23 +1,22 @@
 class Obstacle {
-    constructor ({ positionX }) {
+    constructor ({ positionX, height }) {
         this.positionX = positionX;
-        this.centerY = Math.floor(200 + Math.random() * (500 - 200));
+        this.centerY = Math.floor(200 + Math.random() * ((height-200) - 200));
         this.width = 75;
         this.speed = 150;
         this.gap = 200;
         this.scored = false;
-        
+        this.height = height;
     };
 
     draw(context) {
         context.fillStyle = 'green'; 
         context.fillRect(this.positionX, 0, this.width, this.centerY - this.gap/2);
-        context.fillRect(this.positionX, this.centerY + this.gap/2, this.width, 700 - (this.centerY + this.gap/2));
+        context.fillRect(this.positionX, this.centerY + this.gap/2, this.width, this.height - (this.centerY + this.gap/2));
     }
 
-    update(context, deltaTime, player) {
+    update(context, deltaTime) {
         this.positionX -= this.speed * deltaTime;
-
 
         this.draw(context);
     }
@@ -34,7 +33,7 @@ class Obstacle {
             x: this.positionX,
             y: this.centerY + this.gap / 2,
             width: this.width,
-            height: 700 - (this.centerY + this.gap / 2) 
+            height: this.height - (this.centerY + this.gap / 2) 
         };
     
         const collidesWithTop = this.checkCircleRectCollision(positionX, positionY, radius, topRect);
@@ -50,7 +49,7 @@ class Obstacle {
         const distanceX = circleX - closestX;
         const distanceY = circleY - closestY;
     
-        return (distanceX * distanceX + distanceY * distanceY) <= (radius * radius);
+        return (distanceX * distanceX + distanceY * distanceY) < (radius * radius);
     }
     
     clamp(min, max, value) {
