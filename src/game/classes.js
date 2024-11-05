@@ -1,3 +1,9 @@
+import WireTop from "../assets/wireTop.png";
+import WireBottom from "../assets/wireBottom.png";
+import BackgroundImage from "../assets/background.jpg";
+import Character from "../assets/character_sheet.png";
+import Sparks from "../assets/sparks.png";
+
 class Obstacle {
     constructor ({ positionX, height }) {
         this.positionX = positionX;
@@ -7,12 +13,18 @@ class Obstacle {
         this.gap = 200;
         this.scored = false;
         this.height = height;
+
+        this.top = new Image();
+        this.top.src = WireTop;
+
+        this.bottom = new Image();
+        this.bottom.src = WireBottom;
+
     };
 
     draw(context) {
-        context.fillStyle = 'green'; 
-        context.fillRect(this.positionX, 0, this.width, this.centerY - this.gap/2);
-        context.fillRect(this.positionX, this.centerY + this.gap/2, this.width, this.height - (this.centerY + this.gap/2));
+        context.drawImage(this.top, this.positionX, 0, this.width, this.centerY - this.gap/2);
+        context.drawImage(this.bottom, this.positionX, this.centerY + this.gap/2, this.width, this.height - (this.centerY + this.gap/2));
     }
 
     update(context, deltaTime) {
@@ -23,7 +35,7 @@ class Obstacle {
 
     collision({ positionX, positionY, radius }) {
         const topRect = {
-            x: this.positionX,
+            x: this.positionX+12,
             y: 0,
             width: this.width,
             height: this.centerY - this.gap / 2
@@ -32,7 +44,7 @@ class Obstacle {
         const bottomRect = {
             x: this.positionX,
             y: this.centerY + this.gap / 2,
-            width: this.width,
+            width: this.width-12,
             height: this.height - (this.centerY + this.gap / 2) 
         };
     
@@ -60,16 +72,65 @@ class Obstacle {
 class Player {
     constructor({}) {
         this.velocityY = 0;
-        this.radius = 25;
+        this.radius = 32;
         this.positionX = 100;
         this.positionY = 200;
+
+        this.character = new Image();
+        this.character.src = Character;
+
+        this.character.onload = () => {
+            this.height = 512;
+            this.width = 4096 / 8
+        }
+
+        this.sparks = new Image();
+        this.sparks.src = Sparks;
+
+        this.sparks.onload = () => {
+            this.height = 1028;
+            this.width = 4112 / 4
+        }
+
+        this.frame = 0;
+        this.framesElapsed = 0;
+
+        this.angle = Math.PI / 4;
     }
 
     draw(context) {
-        context.beginPath(); // Start a new path
-        context.arc(this.positionX, this.positionY, this.radius, 0, Math.PI * 2); // Draw a circle
-        context.fillStyle = 'yellow'; // Set the fill color
-        context.fill(); 
+        const minTilt = -Math.PI / 4; 
+        const maxTilt = Math.PI / 4;  
+
+        const minSpeed = -1000; 
+        const maxSpeed = 1000;  
+
+        const ang = ((this.velocityY - minSpeed) / (maxSpeed - minSpeed)) * (maxTilt - minTilt) + minTilt;
+
+        this.angle = Math.max(minTilt, Math.min(maxTilt, ang));
+
+        const rotationX = this.positionX; 
+        const rotationY = this.positionY; 
+
+        context.save();
+        context.translate(rotationX, rotationY);
+        context.rotate(this.angle);
+
+        context.drawImage(
+            this.character,                      
+            (this.frame % 8) * 512, 0, 512, 512, 
+            -this.radius, -this.radius,          
+            this.radius * 2, this.radius * 2     
+        );
+
+        context.drawImage(
+            this.sparks,                      
+            (this.frame % 4) * 1028, 0, 1028, 1028, 
+            -this.radius*2, -this.radius*2,          
+            this.radius * 4, this.radius * 4    
+        );
+
+        context.restore()
     }
 
     jump() {
@@ -77,6 +138,14 @@ class Player {
     }
     
     update(context, deltaTime) {
+        this.framesElapsed++;
+
+        if(this.framesElapsed % 24 === 0) {
+            this.frame++;
+            
+
+        }
+
         this.velocityY += 1000 * deltaTime; 
     
         this.positionY += this.velocityY * deltaTime;
@@ -89,4 +158,30 @@ class Player {
     }
 }
 
-export { Obstacle, Player };
+class Background {
+    constructor({ positionX, width, height }) {
+        this.positionX = positionX;
+        this.width = width;
+        this.height = height;
+        this.speed = 25;
+
+        this.image = new Image();
+        this.image.src = BackgroundImage;
+    }
+
+    update(context, deltaTime) {
+        this.positionX -= this.speed * deltaTime;
+
+        if(this.positionX <= 0 - this.width + 1) {
+            this.positionX = this.width - 1;
+        }
+
+        this.draw(context)
+    }
+
+    draw(context) {
+        context.drawImage(this.image, this.positionX, 0, this.width, this.height);
+    }
+}
+
+export { Obstacle, Player, Background };

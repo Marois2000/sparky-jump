@@ -3,7 +3,7 @@
  * @description The component that holds the game itself
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { Obstacle, Player } from './classes';
+import { Obstacle, Player, Background } from './classes';
 
 function GameComponent() {
     const [gameTime, setGameTime] = useState(0);
@@ -20,12 +20,15 @@ function GameComponent() {
     const [width, setWidth] = useState(window.innerWidth * 7/8);
     const [height, setHeight] = useState(window.innerHeight * 7/8);
 
+    const [backgrounds, setBackgrounds] = useState([]);
 
     const gameInit = () => {
 
         const canvas = canvasRef.current;
         canvas.width = width;
         canvas.height = height;
+
+        setBackgrounds([new Background({ positionX: 0, width: width, height: height}), new Background({ positionX: width - 1, width: width, height: height})])
 
         //generate obstacles
         let previousObstacleX = 400;
@@ -88,6 +91,8 @@ function GameComponent() {
         addPoint();
         checkHit();
         cullObjects();
+        backgrounds.forEach((background) => background.update(context, deltaTime));
+
         obstacles.forEach((obstacle) => obstacle.update(context, deltaTime));
         player.update(context, deltaTime);
     }
