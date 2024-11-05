@@ -98,7 +98,7 @@ class Player {
         this.angle = Math.PI / 4;
     }
 
-    draw(context) {
+    draw(context, dead) {
         const minTilt = -Math.PI / 4; 
         const maxTilt = Math.PI / 4;  
 
@@ -123,12 +123,15 @@ class Player {
             this.radius * 2, this.radius * 2     
         );
 
-        context.drawImage(
-            this.sparks,                      
-            (this.frame % 4) * 1028, 0, 1028, 1028, 
-            -this.radius*2, -this.radius*2,          
-            this.radius * 4, this.radius * 4    
-        );
+        if(!dead) {
+            console.log("DEAD")
+            context.drawImage(
+                this.sparks,                      
+                (this.frame % 4) * 1028, 0, 1028, 1028, 
+                -this.radius*2, -this.radius*2,          
+                this.radius * 4, this.radius * 4    
+            );
+        }
 
         context.restore()
     }
@@ -137,7 +140,7 @@ class Player {
         this.velocityY = -450
     }
     
-    update(context, deltaTime) {
+    update(context, deltaTime, dead) {
         this.framesElapsed++;
 
         if(this.framesElapsed % 24 === 0) {
@@ -154,7 +157,7 @@ class Player {
             this.velocityY = 2000;
         }
     
-        this.draw(context);
+        this.draw(context, dead);
     }
 }
 

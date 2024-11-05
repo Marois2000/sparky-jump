@@ -4,6 +4,7 @@
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { Obstacle, Player, Background } from './classes';
+import { useNavigate } from 'react-router-dom';
 
 function GameComponent() {
     const [gameTime, setGameTime] = useState(0);
@@ -15,12 +16,16 @@ function GameComponent() {
     const [player, setPlayer] = useState(new Player({}));
     const [isRunning, setIsRunning] = useState(true);
 
+
     const[score, setScore] = useState(0);
+    const [dead, setDead] = useState(false);
 
     const [width, setWidth] = useState(window.innerWidth * 7/8);
     const [height, setHeight] = useState(window.innerHeight * 7/8);
 
     const [backgrounds, setBackgrounds] = useState([]);
+
+    const navigator = useNavigate();
 
     const gameInit = () => {
 
@@ -94,7 +99,7 @@ function GameComponent() {
         backgrounds.forEach((background) => background.update(context, deltaTime));
 
         obstacles.forEach((obstacle) => obstacle.update(context, deltaTime));
-        player.update(context, deltaTime);
+        player.update(context, deltaTime, dead);
     }
 
     const cullObjects = () => {
@@ -122,22 +127,27 @@ function GameComponent() {
 
     const checkHit = () => {
         const closest = obstacles.filter((obstacle) => obstacle.positionX > 25 && obstacle.positionX <= 250);
-
+        
         closest.forEach((obstacle) => {
             if (obstacle.collision(player)) {
-                setIsRunning(false);
+                setDead(true);
+                setTimeout(() => {
+                    setIsRunning(false);
+
+                    setTimeout(() => {
+                        navigator("/");
+                    }, 2000);
+                }, 50);
             }
         })
     }
 
     return (
-        <>
-            <div className='w-full h-[100vh] flex justify-center items-center bg-slate-700'>
-                <h1 className='text-white text-5xl absolute top-20 right-1/2'>{score}</h1>
+        <div className='w-full h-[100vh] flex justify-center items-center bg-slate-700'>
+            <h1 className='text-white text-5xl absolute top-20 right-1/2'>{score}</h1>
 
-                <canvas ref={canvasRef} style={{ border: '1px solid black', background: "#2582c3" }}></canvas>
-            </div>
-        </>
+            <canvas ref={canvasRef} style={{ border: '1px solid black', background: "#2582c3" }}></canvas>
+        </div>
     );
 }
 
